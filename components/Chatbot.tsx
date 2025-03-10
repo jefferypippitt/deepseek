@@ -10,6 +10,8 @@ import {
   MessageAction
 } from '@/components/ui/message';
 import { Markdown } from '@/components/ui/markdown';
+import { ChatContainer } from '@/components/ui/chat-container';
+import { ScrollButton } from '@/components/ui/scroll-button';
 
 import {
   PromptInput,
@@ -341,6 +343,7 @@ function ChatInput({
 // Main Chatbot component
 export function Chatbot() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const [isTimedOut, setIsTimedOut] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [messageFeedback, setMessageFeedback] = useState<MessageFeedback>({});
@@ -354,7 +357,6 @@ export function Chatbot() {
         timeoutRef.current = null;
       }
       setIsTimedOut(false);
-      scrollToBottom();
     },
     onError: () => {
       if (timeoutRef.current) {
@@ -385,12 +387,7 @@ export function Chatbot() {
     };
   }, [isLoading]);
 
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages.length]);
-
-  // Scroll to bottom function
+  // Manual scroll to bottom function for when needed
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -475,60 +472,79 @@ export function Chatbot() {
   const shouldShowSuggestions = messages.length === 0 || !isLoading;
 
   return (
-    <div className="flex flex-col h-[600px] w-full max-w-3xl mx-auto border rounded-lg overflow-hidden bg-background">
+    <div className="flex flex-col h-[600px] w-full max-w-3xl mx-auto border rounded-lg overflow-hidden bg-background relative">
       {/* Add the pulse animation */}
       <style jsx>{pulseAnimation}</style>
       
-      <div className="flex-1 p-4 overflow-y-auto space-y-4">
-        {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
-            Start a conversation with DeepSeek AI
-          </div>
-        ) : (
-          <>
-            {messages.map((message) => (
-              <Message key={message.id} className={message.role === 'user' ? 'justify-end' : ''}>
-                {message.role !== 'user' && <DeepSeekAvatar />}
-                
-                {message.role === 'user' ? (
-                  <UserMessage content={message.content} />
-                ) : (
-                  <AssistantMessage 
-                    content={message.content}
-                    messageId={message.id}
-                    feedback={messageFeedback}
-                    copied={copiedMessages}
-                    onFeedback={handleFeedback}
-                    onCopy={handleCopy}
-                  />
-                )}
-                
-                {message.role === 'user' && (
-                  <MessageAvatar
-                    src=""
-                    alt="User"
-                    fallback="U"
-                  />
-                )}
-              </Message>
-            ))}
-            
-            {/* Loading Message */}
-            {isWaitingForResponse && !isTimedOut && (
-              <Message>
-                <DeepSeekAvatar />
-                <LoadingIndicator message={getLoadingMessage()} />
-              </Message>
-            )}
-            
-            {/* Timeout Message */}
-            {isTimedOut && <TimeoutMessage onRetry={handleRetry} />}
-            
-            {/* Error Message */}
-            {error && <ErrorMessage />}
-          </>
-        )}
-        <div ref={messagesEndRef} />
+      <div className="relative flex-1 overflow-hidden">
+        <ChatContainer 
+          className="h-full p-4 space-y-4"
+          ref={chatContainerRef}
+          scrollToRef={messagesEndRef}
+          autoScroll={true}
+        >
+          {messages.length === 0 ? (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+              Start a conversation with DeepSeek AI
+            </div>
+          ) : (
+            <>
+              {messages.map((message) => (
+                <Message key={message.id} className={message.role === 'user' ? 'justify-end' : ''}>
+                  {message.role !== 'user' && <DeepSeekAvatar />}
+                  
+                  {message.role === 'user' ? (
+                    <UserMessage content={message.content} />
+                  ) : (
+                    <AssistantMessage 
+                      content={message.content}
+                      messageId={message.id}
+                      feedback={messageFeedback}
+                      copied={copiedMessages}
+                      onFeedback={handleFeedback}
+                      onCopy={handleCopy}
+                    />
+                  )}
+                  
+                  {message.role === 'user' && (
+                    <MessageAvatar
+                      src=""
+                      alt="User"
+                      fallback="U"
+                    />
+                  )}
+                </Message>
+              ))}
+              
+              {/* Loading Message */}
+              {isWaitingForResponse && !isTimedOut && (
+                <Message>
+                  <DeepSeekAvatar />
+                  <LoadingIndicator message={getLoadingMessage()} />
+                </Message>
+              )}
+              
+              {/* Timeout Message */}
+              {isTimedOut && <TimeoutMessage onRetry={handleRetry} />}
+              
+              {/* Error Message */}
+              {error && <ErrorMessage />}
+            </>
+          )}
+          <div ref={messagesEndRef} className="h-[1px] w-full flex-shrink-0 scroll-mt-4" aria-hidden="true" />
+        </ChatContainer>
+        
+        {/* Scroll Button - Positioned within the chat container */}
+        <div className="absolute bottom-4 right-4 z-10">
+          <ScrollButton
+            scrollRef={messagesEndRef}
+            containerRef={chatContainerRef}
+            variant="secondary"
+            size="sm"
+            threshold={100}
+            onClick={scrollToBottom}
+          />
+        </div>
       </div>
       
       <div className="border-t p-4 bg-background">
