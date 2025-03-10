@@ -1,0 +1,328 @@
+/* KaTeX minimal CSS */
+.katex {
+  font: normal 1.21em KaTeX_Main, Times New Roman, serif;
+  line-height: 1.2;
+  text-indent: 0;
+  text-rendering: auto;
+  display: inline-block;
+}
+
+.katex-display {
+  display: block;
+  margin: 1.5em 0;
+  text-align: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.75em 0;
+  background-color: rgba(0, 0, 0, 0.01);
+  border-radius: 0.25em;
+}
+
+.katex-inline {
+  display: inline-block;
+  margin: 0 0.15em;
+  vertical-align: middle;
+}
+
+/* Additional styles for better rendering */
+.katex-math {
+  display: inline-block;
+}
+
+/* Ensure proper alignment for display math */
+.katex-display .katex {
+  display: block;
+  text-align: center;
+}
+
+/* Style for math errors */
+.katex-error {
+  color: #FF6B6B;
+  background-color: rgba(255, 107, 107, 0.1);
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-family: monospace;
+}
+
+/* Add spacing between math expressions */
+.math p {
+  margin-bottom: 1em;
+}
+
+/* Improve spacing after colons */
+.math p:has(+ .katex-display) {
+  margin-bottom: 0.5em;
+}
+
+.katex-html {
+  /* Prevent the content from being selectable */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Math */
+.katex .mathit {
+  font-style: italic;
+}
+
+.katex .mathbf {
+  font-weight: bold;
+}
+
+.katex .amsrm {
+  font-family: KaTeX_AMS, serif;
+}
+
+/* Sizing */
+.katex .fontsize-ensurer.reset-size1.size1,
+.katex .sizing.reset-size1.size1 {
+  font-size: 1em;
+}
+
+.katex .fontsize-ensurer.reset-size1.size2,
+.katex .sizing.reset-size1.size2 {
+  font-size: 1.2em;
+}
+
+.katex .fontsize-ensurer.reset-size1.size3,
+.katex .sizing.reset-size1.size3 {
+  font-size: 1.4em;
+}
+
+/* Boxed styling */
+.katex .boxed,
+.katex .fbox {
+  display: inline-block;
+  border: 2px solid currentColor;
+  padding: 0.2em 0.4em;
+  margin: 0 0.15em;
+  border-radius: 0.15em;
+  background-color: rgba(0, 0, 0, 0.02);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+}
+
+/* Improved styling for boxed expressions */
+.katex .mord.boxed,
+.katex .mord.fbox {
+  padding: 0.25em 0.5em;
+  border: 2px solid currentColor;
+  border-radius: 0.2em;
+  background-color: rgba(0, 0, 0, 0.02);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+}
+
+/* Enhanced boxed styling for final answers */
+.katex .mord.boxed,
+.katex .mord.fbox,
+.katex .boxed,
+.katex .fbox {
+  padding: 0.25em 0.5em;
+  border: 2px solid currentColor;
+  border-radius: 0.2em;
+  background-color: rgba(0, 0, 0, 0.03);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+/* Dark mode support */
+.dark .katex .boxed,
+.dark .katex .fbox,
+.dark .katex .mord.boxed,
+.dark .katex .mord.fbox {
+  background-color: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  color: #e0e0e0;
+}
+
+/* Square brackets in math mode */
+.katex .mopen,
+.katex .mclose {
+  font-size: 1.05em;
+}
+
+/* Ensure proper spacing for square brackets */
+.katex .mopen + .mord,
+.katex .mord + .mclose {
+  margin: 0 0.05em;
+}
+
+/* Basic layout */
+.katex .vlist-t {
+  display: inline-table;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.katex .vlist-r {
+  display: table-row;
+}
+
+.katex .vlist {
+  display: table-cell;
+  vertical-align: bottom;
+  position: relative;
+}
+
+/* Fractions */
+.katex .frac-line {
+  width: 100%;
+  position: relative;
+}
+
+.katex .frac-line:before {
+  content: '';
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  display: block;
+}
+
+.katex .frac-line:after {
+  content: '';
+  display: table;
+  clear: both;
+}
+
+/* Basic symbols */
+.katex .mord + .mop {
+  margin-left: 0.16667em;
+}
+
+.katex .mord + .mbin {
+  margin-left: 0.22222em;
+}
+
+.katex .mord + .mrel {
+  margin-left: 0.27778em;
+}
+
+.katex .mop + .mord {
+  margin-left: 0.16667em;
+}
+
+.katex .mop + .mop {
+  margin-left: 0.16667em;
+}
+
+.katex .mop + .mrel {
+  margin-left: 0.27778em;
+}
+
+.katex .mbin + .mord {
+  margin-left: 0.22222em;
+}
+
+.katex .mbin + .mop {
+  margin-left: 0.22222em;
+}
+
+.katex .mbin + .mopen {
+  margin-left: 0.22222em;
+}
+
+.katex .mrel + .mord {
+  margin-left: 0.27778em;
+}
+
+.katex .mrel + .mop {
+  margin-left: 0.27778em;
+}
+
+.katex .mrel + .mopen {
+  margin-left: 0.27778em;
+}
+
+/* For boxed expressions */
+.katex .minner {
+  display: inline-block;
+}
+
+/* Final answer boxed styling */
+.katex .mord.text .mord.text {
+  font-weight: 500;
+}
+
+/* Improved spacing for text in math mode */
+.katex .mord.text {
+  margin: 0 0.1em;
+  font-family: var(--font-inter, sans-serif);
+  font-style: normal;
+  font-weight: 400;
+}
+
+.katex .mord.text .mord.text {
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Improved styling for text commands */
+.katex .textrm {
+  font-family: var(--font-inter, sans-serif);
+  font-style: normal;
+  font-weight: 400;
+}
+
+/* Ensure proper spacing between text and math elements */
+.katex .mord.text + .mord,
+.katex .mord + .mord.text {
+  margin: 0 0.15em;
+}
+
+/* Improved styling for units */
+.katex .mord.text:last-child {
+  margin-left: 0.1em;
+}
+
+/* Improved spacing for quad command */
+.katex .mspace {
+  display: inline-block;
+}
+
+.katex .mspace.quad {
+  margin: 0 1em;
+}
+
+.katex .mspace.qquad {
+  margin: 0 2em;
+}
+
+.dark .katex-display {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Improved styling for square root */
+.katex .sqrt {
+  padding-top: 0.1em;
+}
+
+.katex .sqrt .sqrt-sign {
+  position: relative;
+  top: -0.05em;
+}
+
+/* Improved styling for exponents and subscripts */
+.katex .msupsub {
+  text-align: left;
+}
+
+.katex .msupsub .mord {
+  margin-right: 0;
+}
+
+/* Improved styling for fractions */
+.katex .mfrac {
+  padding: 0.1em 0;
+}
+
+/* Improved styling for operators */
+.katex .mbin {
+  margin: 0 0.15em;
+}
+
+.katex .mrel {
+  margin: 0 0.15em;
+} 
