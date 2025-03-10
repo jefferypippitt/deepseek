@@ -24,25 +24,6 @@ const deepseekProvider = createDeepSeek({
 
 export const runtime = 'edge'; // Use Edge runtime for better performance
 
-// Helper function to detect if the query is mathematical
-function isMathematicalQuery(query: string): boolean {
-    // Check for common math patterns
-    const mathPatterns = [
-        /\d+\s*[\+\-\*\/]\s*\d+/,  // Basic operations like 1+1, 5*3
-        /\d+\s*=\s*\?/,            // Equations like 1+1=?
-        /what is \d+\s*[\+\-\*\/]\s*\d+/i, // Questions like "what is 5+3"
-        /calculate/i,              // Words like "calculate"
-        /solve/i,                  // Words like "solve"
-        /equation/i,               // Words like "equation"
-        /\d+\s*\^\s*\d+/,          // Exponents like 2^3
-        /square root/i,            // Square roots
-        /derivative/i,             // Calculus terms
-        /integral/i,               // Calculus terms
-    ];
-    
-    return mathPatterns.some(pattern => pattern.test(query));
-}
-
 export async function POST(req: Request) {
     try {
         // Parse the request body
@@ -76,19 +57,26 @@ export async function POST(req: Request) {
             );
         }
 
-        // Check if the last message is a mathematical query
-        const lastMessage = messages[messages.length - 1];
-        const isMathQuery = lastMessage.role === 'user' && isMathematicalQuery(lastMessage.content);
-        
-        // Adjust temperature based on query type
-        const temperature = isMathQuery ? 0.1 : 0.3;
-
         try {
+            // Add a system message to instruct the model to provide simple text responses
+            const systemMessage = {
+                role: 'system',
+                content: 'For mathematical calculations, provide simple text responses without LaTeX notation. For example, respond to "What is 2+2?" with "2+2 = 4" rather than using LaTeX formatting.'
+            };
+            
+            // Check if there's already a system message
+            const hasSystemMessage = messages.some(msg => msg.role === 'system');
+            
+            // Create a new messages array with the system message if needed
+            const messagesWithSystem = hasSystemMessage 
+                ? messages 
+                : [systemMessage, ...messages];
+
             // Create the stream response
             const response = streamText({
                 model: deepseekProvider('deepseek-chat'),
-                messages,
-                temperature, // Lower temperature for math queries to get more precise answers
+                messages: messagesWithSystem,
+                temperature: 0.3,
             }).toDataStreamResponse({
                 sendReasoning: false, // Disable reasoning for faster responses
             });

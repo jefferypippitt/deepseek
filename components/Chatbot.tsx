@@ -45,91 +45,10 @@ interface CopiedMessages {
   [key: string]: boolean; // messageId -> copied (true) or not (false)
 }
 
-// Define a pulse animation keyframe
-const pulseAnimation = `
-  @keyframes pulse {
-    0% {
-      transform: scale(0.95);
-      opacity: 0.8;
-    }
-    50% {
-      transform: scale(1.05);
-      opacity: 1;
-    }
-    100% {
-      transform: scale(0.95);
-      opacity: 0.8;
-    }
-  }
-`;
-
-// Format the message content to properly display LaTeX and code blocks
+// Format the message content to properly display code blocks
 function formatMessageContent(content: string): string {
-  let formattedContent = content;
-  
-  // Remove backslashes before dollar signs that break LaTeX rendering
-  formattedContent = formattedContent.replace(/\\(\$\$?)/g, '$1');
-  
-  // Fix empty math expressions with just backslashes
-  formattedContent = formattedContent.replace(/\$\$\s*\\s*\$\$/g, '');
-  
-  // Remove backslashes at the end of lines or after colons
-  formattedContent = formattedContent.replace(/(:|^.+)\\(\s*$)/gm, '$1$2');
-  formattedContent = formattedContent.replace(/(:\s*)\\(\s*)/g, '$1$2');
-  
-  // Format math expressions after colons
-  formattedContent = formattedContent.replace(
-    /(Subtract|Add|Multiply|Divide|Simplify|Solve|Calculate|Find|Evaluate)([^:]*):(\s*)$/gm, 
-    (match, verb, rest, space) => {
-      return `${verb}${rest}:${space}\n\n`;
-    }
-  );
-  
-  // Simple direct replacement for Final Answer with empty brackets - handles all cases
-  formattedContent = formattedContent.replace(
-    /Final Answer:[\s\n]*\[[\s\n]*\]/g,
-    "Final Answer:\n\n$$\\boxed{4}$$\n\n"
-  );
-  
-  // Replace existing display math delimiters to ensure they're properly spaced
-  formattedContent = formattedContent.replace(/\$\$([\s\S]*?)\$\$/g, (match, math) => {
-    // Skip empty math blocks
-    if (!math.trim()) return '';
-    return `\n\n$$${math.trim()}$$\n\n`;
-  });
-  
-  // Ensure inline math expressions don't break paragraph structure
-  formattedContent = formattedContent.replace(/\$([^$\n]+?)\$/g, (match, math) => {
-    if (!math.trim()) return '';
-    // If the inline math is at the start of a line, add a space before it
-    if (match.startsWith('\n$')) {
-      return `\n $${math.trim()}$`;
-    }
-    return `$${math.trim()}$`;
-  });
-  
-  // Improve spacing in speed values and measurements
-  formattedContent = formattedContent.replace(/(\d+)(-?)(\d*)(\s*)(kilometers per hour|km\/h|miles per hour|mph)/gi, 
-    (match, num1, hyphen, num2, space, unit) => {
-      // Ensure proper spacing between numbers and units
-      const formattedUnit = unit.toLowerCase()
-        .replace('kilometers per hour', 'kilometers per hour')
-        .replace('miles per hour', 'miles per hour');
-      
-      // If it's a range (contains hyphen)
-      if (hyphen && num2) {
-        return `${num1}${hyphen}${num2} ${formattedUnit}`;
-      }
-      
-      // Single value
-      return `${num1} ${formattedUnit}`;
-    }
-  );
-  
-  // Preserve proper spacing for scientific names in parentheses
-  formattedContent = formattedContent.replace(/\(([A-Z][a-z]+ [a-z]+)\)/g, ' ($1)');
-  
-  return formattedContent;
+  // Simply return the content without any math processing
+  return content;
 }
 
 // Custom DeepSeek AI Avatar component
@@ -223,11 +142,16 @@ function AssistantMessage({
   onFeedback: (id: string, isLiked: boolean) => void; 
   onCopy: (id: string, content: string) => void; 
 }) {
+  // Process the content before rendering
+  const processedContent = formatMessageContent(content);
+  
   return (
     <div className="flex w-full flex-col gap-2">
-      <div className="bg-secondary rounded-lg p-4 prose prose-pre:bg-transparent prose-pre:p-0 prose-pre:m-0 prose-pre:text-muted-foreground prose-pre:border-0 break-words whitespace-normal max-w-[90%] prose-math:my-2 math">
+      <div 
+        className="bg-secondary rounded-lg p-4 prose prose-pre:bg-transparent prose-pre:p-0 prose-pre:m-0 prose-pre:text-muted-foreground prose-pre:border-0 break-words whitespace-normal max-w-[90%]"
+      >
         <Markdown className="markdown-content">
-          {formatMessageContent(content)}
+          {processedContent}
         </Markdown>
       </div>
       
@@ -248,7 +172,7 @@ function AssistantMessage({
           <Button
             variant="ghost"
             size="icon"
-            className={`h-8 w-8 rounded-full ${feedback[messageId] === true ? "bg-green-100 text-green-500" : ""}`}
+            className={`h-8 w-8 rounded-full ${feedback[messageId] === true ? "bg-green-100 text-green-500 dark:bg-green-900/30" : ""}`}
             onClick={() => onFeedback(messageId, true)}
           >
             <ThumbsUp className="size-4" />
@@ -259,7 +183,7 @@ function AssistantMessage({
           <Button
             variant="ghost"
             size="icon"
-            className={`h-8 w-8 rounded-full ${feedback[messageId] === false ? "bg-red-100 text-red-500" : ""}`}
+            className={`h-8 w-8 rounded-full ${feedback[messageId] === false ? "bg-red-100 text-red-500 dark:bg-red-900/30" : ""}`}
             onClick={() => onFeedback(messageId, false)}
           >
             <ThumbsDown className="size-4" />
@@ -473,9 +397,6 @@ export function Chatbot() {
 
   return (
     <div className="flex flex-col h-[600px] w-full max-w-3xl mx-auto border rounded-lg overflow-hidden bg-background relative">
-      {/* Add the pulse animation */}
-      <style jsx>{pulseAnimation}</style>
-      
       <div className="relative flex-1 overflow-hidden">
         <ChatContainer 
           className="h-full p-4 space-y-4"
@@ -537,7 +458,6 @@ export function Chatbot() {
         {/* Scroll Button - Positioned within the chat container */}
         <div className="absolute bottom-4 right-4 z-10">
           <ScrollButton
-            scrollRef={messagesEndRef}
             containerRef={chatContainerRef}
             variant="secondary"
             size="sm"

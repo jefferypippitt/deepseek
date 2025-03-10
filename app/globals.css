@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "./katex-styles.css";
 
 @plugin "tailwindcss-animate";
 
@@ -80,6 +79,7 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --font-inter: var(--font-inter);
 }
 
 .dark {
@@ -122,27 +122,21 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
   }
 }
 
 /* Fix for markdown content to prevent hydration errors */
 .markdown-content p p,
-.markdown-content div p p,
-.katex-display p {
+.markdown-content div p p {
   display: inline;
   margin: 0;
   padding: 0;
 }
 
-/* Ensure proper spacing for math elements */
-.katex-display {
-  margin: 1em 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
-.katex-inline {
-  display: inline-block;
-  vertical-align: middle;
+/* Add these styles for better content formatting */
+@media (max-width: 640px) {
+  .markdown-content {
+    font-size: 0.9em;
+  }
 }

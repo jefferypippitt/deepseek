@@ -62,7 +62,7 @@ const useAutoScroll = (
       container.addEventListener("scrollend", handleScrollEnd, {
         once: true,
       })
-    } catch (e) {
+    } catch {
       // scrollend event not supported in this browser, fallback to requestAnimationFrame
     }
   }, [containerRef])
@@ -180,19 +180,20 @@ function ChatContainer({
   )
 
   useEffect(() => {
-    const childrenArray = React.Children.toArray(children)
-    const currentChildrenCount = childrenArray.length
+    if (React.Children.count(children) === 0) return
+
+    const currentChildrenCount = React.Children.count(children)
     
-    if (currentChildrenCount > prevChildrenCountRef.current) {
+    if (prevChildrenCountRef.current !== null && currentChildrenCount > prevChildrenCountRef.current) {
       setNewMessageAdded(true)
-    } 
-    else if (prevChildrenRef.current !== children) {
+      contentChangedWithoutNewMessageRef.current = false
+    } else if (prevChildrenRef.current !== children) {
       contentChangedWithoutNewMessageRef.current = true
     }
     
     prevChildrenCountRef.current = currentChildrenCount
     prevChildrenRef.current = children
-  }, [children, setNewMessageAdded])
+  }, [children, setNewMessageAdded, prevChildrenCountRef])
 
   useEffect(() => {
     if (!autoScroll) return

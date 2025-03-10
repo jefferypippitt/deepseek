@@ -1,9 +1,12 @@
 import { cn } from "@/lib/utils"
-import { marked } from "marked"
 import { memo, useId, useMemo } from "react"
 import ReactMarkdown, { Components } from "react-markdown"
 import remarkGfm from "remark-gfm"
+import remarkMath from "remark-math"
+import rehypeKatex from "rehype-katex"
 import { CodeBlock, CodeBlockCode } from "./code-block"
+import { bundledLanguages } from "shiki"
+import "katex/dist/katex.min.css"
 
 export type MarkdownProps = {
   children: string
@@ -12,15 +15,53 @@ export type MarkdownProps = {
   components?: Partial<Components>
 }
 
+// Function to preprocess markdown content
+function preprocessMarkdown(markdown: string): string {
+  // Convert LaTeX-style brackets to proper markdown math syntax
+  // Replace [math] with $math$
+  return markdown.replace(/\[(.*?)\]/g, (match, content) => {
+    // Only convert if it looks like math content
+    if (/\\|=|\+|-|\*|\/|boxed|quad|text/.test(content)) {
+      return `$${content}$`;
+    }
+    return match;
+  });
+}
+
+// Keep the entire content as one block
 function parseMarkdownIntoBlocks(markdown: string): string[] {
-  const tokens = marked.lexer(markdown)
-  return tokens.map((token) => token.raw)
+  return [preprocessMarkdown(markdown)];
 }
 
 function extractLanguage(className?: string): string {
   if (!className) return "plaintext"
+  
+  // Extract language from className (e.g., "language-javascript" -> "javascript")
   const match = className.match(/language-(\w+)/)
-  return match ? match[1] : "plaintext"
+  const extractedLang = match ? match[1] : "plaintext"
+  
+  // Check if the language is supported by Shiki
+  if (extractedLang in bundledLanguages) {
+    return extractedLang
+  }
+  
+  // Handle common aliases
+  const langMap: Record<string, string> = {
+    'js': 'javascript',
+    'ts': 'typescript',
+    'py': 'python',
+    'rb': 'ruby',
+    'sh': 'bash',
+    'yml': 'yaml',
+    'md': 'markdown',
+  }
+  
+  if (extractedLang in langMap && langMap[extractedLang] in bundledLanguages) {
+    return langMap[extractedLang]
+  }
+  
+  // Default to plaintext if language is not supported
+  return "plaintext"
 }
 
 const INITIAL_COMPONENTS: Partial<Components> = {
@@ -65,7 +106,11 @@ const MemoizedMarkdownBlock = memo(
     components?: Partial<Components>
   }) {
     return (
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+      <ReactMarkdown 
+        remarkPlugins={[remarkGfm, remarkMath]} 
+        rehypePlugins={[rehypeKatex]}
+        components={components}
+      >
         {content}
       </ReactMarkdown>
     )
