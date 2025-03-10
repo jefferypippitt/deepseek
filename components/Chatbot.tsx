@@ -396,22 +396,30 @@ export function Chatbot() {
   const shouldShowSuggestions = messages.length === 0 || !isLoading;
 
   return (
-    <div className="flex flex-col h-[600px] w-full max-w-3xl mx-auto border rounded-lg overflow-hidden bg-background relative">
+    <div className="flex flex-col h-[650px] border rounded-b-lg rounded-t-none border-t-0 overflow-hidden bg-background">
       <div className="relative flex-1 overflow-hidden">
-        <ChatContainer 
-          className="h-full p-4 space-y-4"
+        <ChatContainer
           ref={chatContainerRef}
-          scrollToRef={messagesEndRef}
+          className="h-full px-6 py-4"
           autoScroll={true}
         >
           {messages.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              Start a conversation with DeepSeek AI
+            <div className="flex flex-col items-center justify-center h-full space-y-4 text-muted-foreground">
+              <div className="h-24 w-24 rounded-full overflow-hidden flex items-center justify-center bg-white">
+                <Image 
+                  src="/deepseek-logo.svg" 
+                  alt="DeepSeek AI" 
+                  className="h-20 w-20 object-cover"
+                  width={80}
+                  height={80}
+                />
+              </div>
+              <p className="text-lg">Start a conversation with DeepSeek AI</p>
             </div>
           ) : (
             <>
               {messages.map((message) => (
-                <Message key={message.id} className={message.role === 'user' ? 'justify-end' : ''}>
+                <Message key={message.id} className={`${message.role === 'user' ? 'justify-end' : ''} mb-4`}>
                   {message.role !== 'user' && <DeepSeekAvatar />}
                   
                   {message.role === 'user' ? (

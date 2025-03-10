@@ -14,6 +14,7 @@ const useAutoScroll = (
   const [newMessageAdded, setNewMessageAdded] = useState(false)
   const prevChildrenCountRef = useRef(0)
   const scrollTriggeredRef = useRef(false)
+  const prevContentRef = useRef<string>("")
 
   const isAtBottom = useCallback((element: HTMLDivElement) => {
     const { scrollTop, scrollHeight, clientHeight } = element
@@ -115,6 +116,19 @@ const useAutoScroll = (
       }
     }
 
+    // Set up a mutation observer to detect content changes
+    const observer = new MutationObserver(() => {
+      if (autoScrollEnabled && !autoScrollingRef.current) {
+        scrollToBottom("auto");
+      }
+    });
+
+    observer.observe(container, { 
+      childList: true, 
+      subtree: true, 
+      characterData: true 
+    });
+
     container.addEventListener("scroll", handleScroll, { passive: true })
     container.addEventListener("wheel", handleWheel, { passive: true })
     container.addEventListener("touchstart", handleTouchStart, {
@@ -129,8 +143,9 @@ const useAutoScroll = (
       container.removeEventListener("touchstart", handleTouchStart)
       container.removeEventListener("touchmove", handleTouchMove)
       container.removeEventListener("touchend", handleTouchEnd)
+      observer.disconnect();
     }
-  }, [containerRef, enabled, autoScrollEnabled, isAtBottom])
+  }, [containerRef, enabled, autoScrollEnabled, isAtBottom, scrollToBottom])
 
   return {
     autoScrollEnabled,
@@ -140,6 +155,7 @@ const useAutoScroll = (
     newMessageAdded,
     setNewMessageAdded,
     prevChildrenCountRef,
+    prevContentRef,
   }
 }
 
@@ -173,7 +189,8 @@ function ChatContainer({
     scrollTriggered,
     newMessageAdded,
     setNewMessageAdded,
-    prevChildrenCountRef
+    prevChildrenCountRef,
+    prevContentRef
   } = useAutoScroll(
     chatContainerRef,
     autoScroll
@@ -217,6 +234,17 @@ function ChatContainer({
     
     requestAnimationFrame(scrollHandler)
     
+    // Check for content changes in streaming responses
+    const currentContent = chatContainerRef.current?.textContent || "";
+    if (
+      autoScrollEnabled && 
+      prevContentRef.current !== currentContent && 
+      currentContent.length > prevContentRef.current.length
+    ) {
+      scrollToBottom("auto");
+    }
+    prevContentRef.current = currentContent;
+    
   }, [
     children, 
     autoScroll, 
@@ -225,7 +253,9 @@ function ChatContainer({
     scrollTriggered,
     scrollToBottom, 
     newMessageAdded, 
-    setNewMessageAdded
+    setNewMessageAdded,
+    prevContentRef,
+    chatContainerRef
   ])
 
   return (
